@@ -22,6 +22,15 @@ except ImportError:
 DB_PATH = "productos.db"
 IMG_PATH = "avatar_mujer.png"
 
+# === PALETA DE COLORES CÁLIDOS (Terracota y Crema) ===
+COLOR_FONDO_VENTANA = "#f7f0e6" # Crema Claro
+COLOR_FONDO_PANEL = "#e4d9c7"  # Crema Medio
+COLOR_TEXTO_PRIMARIO = "#333333" # Gris Oscuro
+COLOR_TEXTO_SECUNDARIO = "#6b7280" # Gris Suave
+COLOR_BOTON_ACCION = "#c75c3e" # Terracota
+COLOR_BOTON_VOZ = "#5e81a3"    # Azul Suave (para contraste en voz)
+COLOR_BOTON_TEXTO = "#e5e7eb" # Blanco para botones
+
 # ========= VOZ (pyttsx3) =========
 engine = None
 def init_voice():
@@ -81,18 +90,19 @@ def init_db():
     # Insertar más de 10 productos si está vacío
     cur.execute("SELECT COUNT(*) FROM productos")
     if cur.fetchone()[0] == 0:
+        # === PRODUCTOS DE FERRETERÍA ===
         productos_iniciales = [
-            ("Arroz 1kg", 3800, 5200),
-            ("Aceite 1L", 7800, 9800),
-            ("Azúcar 1kg", 3500, 4800),
-            ("Sal 1kg", 2000, 3000),
-            ("Leche 1L", 2500, 3500),
-            ("Huevos docena", 8000, 11000),
-            ("Pan 500g", 2500, 3500),
-            ("Café 250g", 9000, 12000),
-            ("Pasta 500g", 4000, 5500),
-            ("Frijol 1kg", 4500, 6000),
-            ("Harina 1kg", 3000, 4200)
+             ("Taladro percutor", 180000, 250000),
+            ("Caja de tornillos", 15000, 25000),
+            ("Sierra caladora", 120000, 180000),
+            ("Martillo de uña", 25000, 45000),
+            ("Metro de 5m", 10000, 16000),
+            ("Guantes de seguridad", 7000, 11000),
+            ("Pegamento epóxico", 22000, 35000),
+            ("Lija grano 80", 1500, 2500),
+            ("Brocha 2 pulgadas", 6000, 10000),
+            ("Cable 12 AWG 10m", 35000, 50000),
+            ("Nivel de burbuja", 18000, 28000)
         ]
         cur.executemany("INSERT INTO productos(nombre, mayorista, venta) VALUES (?,?,?)", productos_iniciales)
         conn.commit()
@@ -147,13 +157,13 @@ def promocion_10x100():
     nombres = [r[0] for r in cur.fetchall()]
     if len(nombres) < 10:
         return "Aún no hay 10 productos para la promoción."
-    return f"Promoción: 10 productos ({', '.join(nombres)}) por 100.000 pesos."
+    return f"Promoción de Ferretería: 10 productos ({', '.join(nombres)}) por 100.000 pesos."
 
 # ========= INTERFAZ (Tkinter) =========
 root = tk.Tk()
 root.title("Avatar de negocio • Texto + Voz (mujer) • Promociones")
 root.geometry("900x600")
-root.configure(bg="#0f1220")
+root.configure(bg=COLOR_FONDO_VENTANA)
 
 # Layout principal
 root.columnconfigure(0, weight=0)
@@ -164,17 +174,17 @@ root.rowconfigure(2, weight=0)
 root.rowconfigure(3, weight=0)
 
 # Panel Avatar (izquierda)
-panel_avatar = tk.Frame(root, bg="#171a2a", bd=0)
+panel_avatar = tk.Frame(root, bg=COLOR_FONDO_PANEL, bd=0)
 panel_avatar.grid(row=0, column=0, rowspan=4, sticky="ns")
 panel_avatar.configure(width=280)
 for i in range(6):
     panel_avatar.rowconfigure(i, weight=0)
 
-lbl_title = tk.Label(panel_avatar, text="Tu asistente", bg="#171a2a", fg="#e5e7eb", font=("Segoe UI", 12, "bold"))
+lbl_title = tk.Label(panel_avatar, text="Tu asistente", bg=COLOR_FONDO_PANEL, fg=COLOR_TEXTO_PRIMARIO, font=("Segoe UI", 12, "bold"))
 lbl_title.grid(row=0, column=0, padx=12, pady=8)
 
 # Imagen
-img_label = tk.Label(panel_avatar, bg="#171a2a")
+img_label = tk.Label(panel_avatar, bg=COLOR_FONDO_PANEL)
 img_label.grid(row=1, column=0, padx=12, pady=8)
 def load_image():
     if Image and ImageTk and os.path.exists(IMG_PATH):
@@ -184,14 +194,14 @@ def load_image():
             img_label.image = photo
             img_label.configure(image=photo)
         except Exception as e:
-            img_label.configure(text="(No se pudo cargar la imagen)", fg="#ef4444")
+            img_label.configure(text="(No se pudo cargar la imagen)", fg=COLOR_BOTON_ACCION)
     else:
-        img_label.configure(text="(Imagen no disponible)", fg="#ef4444")
+        img_label.configure(text="(Imagen no disponible)", fg=COLOR_BOTON_ACCION)
 load_image()
 
 # Estado de voz
 voice_state = tk.StringVar(value=f"Voz: {'ON' if voice_ready else 'OFF'}")
-btn_voice = tk.Button(panel_avatar, textvariable=voice_state, bg="#0ea56c", fg="#071b12", relief="raised",
+btn_voice = tk.Button(panel_avatar, textvariable=voice_state, bg=COLOR_BOTON_VOZ, fg=COLOR_BOTON_TEXTO, relief="raised",
                       command=lambda: toggle_voice())
 btn_voice.grid(row=2, column=0, padx=12, pady=6)
 
@@ -210,17 +220,17 @@ def toggle_voice():
         voice_state.set(f"Voz: {'ON' if ok else 'OFF'}")
 
 # Panel Catálogo (arriba derecha)
-panel_catalogo = tk.Frame(root, bg="#171a2a")
+panel_catalogo = tk.Frame(root, bg=COLOR_FONDO_PANEL)
 panel_catalogo.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
 panel_catalogo.columnconfigure(0, weight=1)
 
-tk.Label(panel_catalogo, text="Productos (Mayorista y Venta)", bg="#171a2a", fg="#9ca3af").grid(row=0, column=0, sticky="w")
+tk.Label(panel_catalogo, text="Productos (Mayorista y Venta)", bg=COLOR_FONDO_PANEL, fg=COLOR_TEXTO_SECUNDARIO).grid(row=0, column=0, sticky="w")
 
-frm_form = tk.Frame(panel_catalogo, bg="#171a2a")
+frm_form = tk.Frame(panel_catalogo, bg=COLOR_FONDO_PANEL)
 frm_form.grid(row=1, column=0, sticky="ew", pady=6)
-tk.Label(frm_form, text="Nombre", bg="#171a2a", fg="#e5e7eb").grid(row=0, column=0)
-tk.Label(frm_form, text="Mayorista (COP)", bg="#171a2a", fg="#e5e7eb").grid(row=0, column=2)
-tk.Label(frm_form, text="Venta (COP)", bg="#171a2a", fg="#e5e7eb").grid(row=0, column=4)
+tk.Label(frm_form, text="Nombre", bg=COLOR_FONDO_PANEL, fg=COLOR_TEXTO_PRIMARIO).grid(row=0, column=0)
+tk.Label(frm_form, text="Mayorista (COP)", bg=COLOR_FONDO_PANEL, fg=COLOR_TEXTO_PRIMARIO).grid(row=0, column=2)
+tk.Label(frm_form, text="Venta (COP)", bg=COLOR_FONDO_PANEL, fg=COLOR_TEXTO_PRIMARIO).grid(row=0, column=4)
 
 entry_nombre = tk.Entry(frm_form, width=28)
 entry_mayorista = tk.Entry(frm_form, width=12)
@@ -249,7 +259,7 @@ def on_guardar():
         cargar_tabla()
     messagebox.showinfo("Estado", msg)
 
-btn_guardar = tk.Button(frm_form, text="Guardar", command=on_guardar, bg="#12b981", fg="#071b12")
+btn_guardar = tk.Button(frm_form, text="Guardar", command=on_guardar, bg=COLOR_BOTON_ACCION, fg=COLOR_BOTON_TEXTO)
 btn_guardar.grid(row=0, column=6, padx=6)
 
 # Tabla
@@ -268,16 +278,16 @@ def cargar_tabla():
 cargar_tabla()
 
 # Panel Chat (medio derecha)
-panel_chat = tk.Frame(root, bg="#171a2a")
+panel_chat = tk.Frame(root, bg=COLOR_FONDO_PANEL)
 panel_chat.grid(row=1, column=1, sticky="ew", padx=10)
-tk.Label(panel_chat, text="Chat de precios", bg="#171a2a", fg="#9ca3af").grid(row=0, column=0, columnspan=4, sticky="w", pady=(0,6))
+tk.Label(panel_chat, text="Chat de precios", bg=COLOR_FONDO_PANEL, fg=COLOR_TEXTO_SECUNDARIO).grid(row=0, column=0, columnspan=4, sticky="w", pady=(0,6))
 
 entry_pregunta = tk.Entry(panel_chat, width=50)
-btn_preg_texto = tk.Button(panel_chat, text="Preguntar (texto)", bg="#131834", fg="#cbd5e1",
+btn_preg_texto = tk.Button(panel_chat, text="Preguntar (texto)", bg=COLOR_BOTON_ACCION, fg=COLOR_BOTON_TEXTO,
                            command=lambda: preguntar_texto())
-btn_preg_voz = tk.Button(panel_chat, text="Preguntar (voz mujer)", bg="#131834", fg="#cbd5e1",
+btn_preg_voz = tk.Button(panel_chat, text="Preguntar (voz mujer)", bg=COLOR_BOTON_VOZ, fg=COLOR_BOTON_TEXTO,
                          command=lambda: preguntar_voz())
-btn_promo = tk.Button(panel_chat, text="Promoción 10x100mil", bg="#0ea56c", fg="#071b12",
+btn_promo = tk.Button(panel_chat, text="Promoción 10x100mil", bg=COLOR_BOTON_ACCION, fg=COLOR_BOTON_TEXTO,
                       command=lambda: mostrar_respuesta(promocion_10x100()))
 
 entry_pregunta.grid(row=1, column=0, padx=6)
@@ -286,7 +296,7 @@ btn_preg_voz.grid(row=1, column=2, padx=6)
 btn_promo.grid(row=1, column=3, padx=6)
 
 # Respuesta
-txt_resp = tk.Text(root, height=4, width=90, bg="#131834", fg="#e5e7eb")
+txt_resp = tk.Text(root, height=4, width=90, bg=COLOR_FONDO_PANEL, fg=COLOR_TEXTO_PRIMARIO)
 txt_resp.grid(row=2, column=1, sticky="ew", padx=10, pady=8)
 txt_resp.configure(state="disabled")
 
@@ -295,16 +305,22 @@ def mostrar_respuesta(texto):
     txt_resp.delete("1.0", tk.END)
     txt_resp.insert(tk.END, texto)
     txt_resp.configure(state="disabled")
-    # Hablar solo si el botón está ON
+    # ✅ CLAVE: Hablar si la voz está ON
     if voice_state.get().endswith("ON"):
         speak(texto)
 
 def preguntar_texto():
     q = entry_pregunta.get().strip()
     if not q:
-        mostrar_respuesta("Escribe tu pregunta (ej.: 'mayorista de arroz 1kg').")
+        # Mensaje de ayuda (también hablado)
+        mostrar_respuesta("Escribe tu pregunta (ej.: 'mayorista de taladro percutor').")
         return
-    mostrar_respuesta(buscar_precio(q))
+    
+    # 1. Obtener la respuesta del precio.
+    respuesta = buscar_precio(q)
+    
+    # 2. Mostrar la respuesta (esto activa la voz gracias a mostrar_respuesta).
+    mostrar_respuesta(respuesta) 
 
 def preguntar_voz():
     if sr is None:
@@ -316,7 +332,10 @@ def preguntar_voz():
             mostrar_respuesta("Te escucho... di el producto y si es mayorista o venta.")
             audio = r.listen(source, timeout=5, phrase_time_limit=5)
         q = r.recognize_google(audio, language="es-ES")
-        mostrar_respuesta(buscar_precio(q))
+        # Obtener la respuesta
+        respuesta = buscar_precio(q)
+        # Mostrar y hablar la respuesta
+        mostrar_respuesta(respuesta)
     except sr.WaitTimeoutError:
         mostrar_respuesta("No te escuché. Intenta de nuevo.")
     except sr.UnknownValueError:
@@ -325,6 +344,6 @@ def preguntar_voz():
         mostrar_respuesta(f"No pude usar el micrófono: {e}")
 
 # Pie
-tk.Label(root, text="Hecho con Tkinter + SQLite + Voz", bg="#0f1220", fg="#64748b").grid(row=3, column=1, sticky="e", padx=10, pady=6)
+tk.Label(root, text="Hecho con Tkinter + SQLite + Voz", bg=COLOR_FONDO_VENTANA, fg=COLOR_TEXTO_SECUNDARIO).grid(row=3, column=1, sticky="e", padx=10, pady=6)
 
 root.mainloop()
